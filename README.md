@@ -79,105 +79,35 @@ Client-server chat applications are foundational to real-time communication over
 
 Server:
 ```
+
 import socket
-import threading
-
-HOST = "localhost"
-PORT = 3000
-
-def handle_receive(conn):
-    while True:
-        try:
-            msg = conn.recv(1024).decode()
-            if not msg or msg.lower() == "bye":
-                print("❌ Client disconnected.")
-                break
-            print(f"\033[94mClient:\033[0m {msg}")
-        except:
-            break
-
-def handle_send(conn, server_name):
-    while True:
-        msg = input(f"{server_name}: ")
-        conn.send(msg.encode())
-        if msg.lower() == "bye":
-            print("👋 Closing connection.")
-            break
-
-def start_server():
-    server_name = input("Enter server display name: ")
-    print("🎈 Starting Interactive Chat Server...")
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-        server_socket.bind((HOST, PORT))
-        server_socket.listen(1)
-        print(f"✅ Server listening on {HOST}:{PORT}...")
-
-        conn, addr = server_socket.accept()
-        print(f"🎉 Connected to {addr}")
-        conn.send(f"Welcome to {server_name}'s server! Type 'bye' to exit.".encode())
-
-        # Start send and receive threads
-        threading.Thread(target=handle_receive, args=(conn,), daemon=True).start()
-        threading.Thread(target=handle_send, args=(conn, server_name), daemon=True).start()
-
-        # Keep server running until connection closes
-        while True:
-            pass
-
-if __name__ == "__main__":
-    start_server()
+s=socket.socket()
+s.connect(('localhost',6000))
+print(s.getsockname())
+print(s.recv(1024).decode())
+s.send("acknowledgement recived from the server".encode())
 ```
 Client:
 ```
 import socket
-import threading
-
-HOST = "localhost"
-PORT = 3000
-
-def handle_receive(client_socket):
-    while True:
-        try:
-            msg = client_socket.recv(1024).decode()
-            if not msg or msg.lower() == "bye":
-                print("❌ Server closed the connection.")
-                break
-            print(f"\033[95mServer:\033[0m {msg}")
-        except:
-            break
-
-def handle_send(client_socket, client_name):
-    while True:
-        msg = input(f"{client_name}: ")
-        client_socket.send(msg.encode())
-        if msg.lower() == "bye":
-            print("👋 Disconnected from server.")
-            break
-
-def start_client():
-    client_name = input("Enter your display name: ")
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-        client_socket.connect((HOST, PORT))
-        print("✅ Connected to the server.")
-
-        welcome = client_socket.recv(1024).decode()
-        print(f"\033[92m{welcome}\033[0m")
-
-        # Start send and receive threads
-        threading.Thread(target=handle_receive, args=(client_socket,), daemon=True).start()
-        threading.Thread(target=handle_send, args=(client_socket, client_name), daemon=True).start()
-
-        while True:
-            pass
-
-if __name__ == "__main__":
-    start_client()
+from datetime import datetime
+s=socket.socket()
+s.bind(('localhost',6000))
+s.listen(5)
+c,addr=s.accept()
+print("Client Address : ",addr)
+now = datetime.now()
+c.send(now.strftime("%d/%m/%Y %H:%M:%S").encode())
+ack=c.recv(1024).decode()
+if ack:
+    print(ack)
+c.close()
 ```
 
 ## OUTPUT:
 
-<img width="1918" height="1137" alt="image" src="https://github.com/user-attachments/assets/16c0490a-e187-4ccb-9d83-a8053b0fc105" />
+
+<img width="1918" height="1142" alt="image" src="https://github.com/user-attachments/assets/29841b63-277a-4db5-8dd9-9c9ba00f5bbe" />
 
 
 ## Result:
